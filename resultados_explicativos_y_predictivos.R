@@ -144,7 +144,8 @@ or5<-order(data_comparacion_entrenamiento2$Probabilidad_Ausentismo_Estimada2)
 plot(data_comparacion_entrenamiento2$Probabilidad_Ausentismo_Estimada2[or5],type="l",ylim=c(0,1.2),xlab="Casillas
      (ordenadas segun el modelo de menor a mayor probabilidad)",ylab="Probabilidad de Ausentismo",
      main=paste("Comparativa de probabilidades de Ausentismo del modelo
-                vs Casos Reales"))
+vs Casos Reales en los datos de entrenamiento
+(usando las probabilidades individuales de cada Indicadora)"))
 points(data_comparacion_entrenamiento2$Y_reales[or5],cex=.5,col=2,type="p")
 
 
@@ -176,57 +177,19 @@ or4<-order(data_comparacion_prueba2$Probabilidad_Ausentismo_Predicha2)
 plot(data_comparacion_prueba2$Probabilidad_Ausentismo_Predicha2[or4],type="l",ylim=c(0,1.2),xlab="Casillas
      (ordenadas segun el modelo de menor a mayor probabilidad)",ylab="Probabilidad de Ausentismo",
      main=paste("Comparativa de probabilidades de Ausentismo del modelo
-vs Casos Reales"))
+vs Casos Realesen los datos de prueba
+(usando las probabilidades individuales de cada Indicadora)"))
 points(data_comparacion_prueba2$Y_reales[or4],cex=.5,col=2,type="p")
 
 ###################################################################
 #####Matriz de confusión
 #Hay que recordar que siempre la usaremos para predicción.
-matriz_confusion<-function(configuracion_theta,umbral=0.5){
-  resumen_<-data.frame(resumen_jags$resumen)
-  tabla_prueba<-data.frame(resumen_jags$Tabla_no_usada)
-  #y_estimadas2<-resumen_[grep("yest",rownames(resumen_)),]
-  #titulo<-resumen_jags$Titulo
+matriz_confusion<-function(tabla_comparativa,umbral=0.5){
   
-  betas<-resumen_[grep("beta",rownames(resumen_)),]
-  
-  coeficientes<-rbind(resumen_[1,],betas)
-  coeficientes_final<-subset(coeficientes,select = c("mean","sd","X2.5.","X97.5."))
-  
-  names(coeficientes_final)<-c("Media","DE","cuantil 2.5%","cuantil 97.5%")
-  names(coeficientes_final)<-c("Media","DE","lim.inf. 95%","lim. sup. 95%")
-  
-  medias_coef<-coeficientes_final$Media
-  
-  x_prueba<-resumen_jags$matriz_X_prueba
-  x2_prueba<-matrix(cbind(rep(1,nrow(x_prueba)),x_prueba),ncol=ncol(x_prueba)+1)
-  
-  x_prueba<-resumen_jags$matriz_X_prueba
-  x2_prueba<-matrix(cbind(rep(1,nrow(x_prueba)),x_prueba),ncol=ncol(x_prueba)+1)
-  
-  eta<-numeric(nrow(x_prueba))
-  for(i in 1:nrow(x2_prueba))
-    #i<-1
-    for(j in 1:ncol(x2_prueba)){
-      #j<-1
-      eta[i]<-eta[i]+x2_prueba[i,j]*medias_coef[j]
-      
-    }
-  if(tipo_de_liga=="logit"){
-    
-    p<-exp(eta)/(1+exp(eta))
-    
-  }else{
-    
-    p<-pnorm(eta)
-  }
-  
-  tabla_comparativa<-data.frame(
-    #Y_Estimadas=y_estimadas2$mean,
-    Reales=tabla_prueba$Ausentismo2,Probabilidad_estimada=p)
-  #or2<-order(p)
-  data_real_ausentismo<-subset(tabla_comparativa,Reales==1)
-  data_real_NO_ausentismo<-subset(tabla_comparativa,Reales==0)
+  data_real_ausentismo<-subset(tabla_comparativa,Y_reales==1)
+  data_real_NO_ausentismo<-subset(tabla_comparativa,Y_reales==0)
+  names(data_real_ausentismo)[2]<-"Probabilidad_estimada"
+  names(data_real_NO_ausentismo)[2]<-"Probabilidad_estimada"
   
   verdaderos_positivos<-length(data_real_ausentismo$Probabilidad_estimada[which(data_real_ausentismo$Probabilidad_estimada>=umbral)])
   falsos_negativos<-length(data_real_ausentismo$Probabilidad_estimada[which(data_real_ausentismo$Probabilidad_estimada<=umbral)])
@@ -247,4 +210,11 @@ matriz_confusion<-function(configuracion_theta,umbral=0.5){
   return(mat_conf)
 }
 
+matriz_confusion(data_comparacion_entrena)
+
+matriz_confusion(data_comparacion_prueba)
+
+matriz_confusion(data_comparacion_entrenamiento2)
+
+matriz_confusion(data_comparacion_prueba2)
 
