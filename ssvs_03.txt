@@ -12,7 +12,7 @@ model{
     #tau ~ dgamma(1.0E-4,1.0E-4) # Esta no la ponemos porque es la precisión cuando y[i] es normal
     tauBeta <-pow(sdBeta,-2);   sdBeta ~ dunif(0,20) #tau_in=tauBeta #sd_bet=sdBeta
     TauM[1] <- tauBeta*1000;      TauM[2] <- tauBeta #TauM[1]=tau[1]; TauM[2]=tau[2]
-    PInd[2] <- 20/127;      PInd[1] <- 1-PInd[2] #PInd[2]=p_ind[1]; PInd[1]=p_ind[2]
+    PInd[2] <- 0.5;      PInd[1] <- 1-PInd[2] #PInd[2]=p_ind[1]; PInd[1]=p_ind[2]
 
     for(i in 1:var_expl){
     

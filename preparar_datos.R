@@ -11,8 +11,8 @@ preparar_datos<-function(tabla_datos,Entidad="NACIONAL",Concurrente=1,proporcion
     tabla_entrena1<-subset(subset(tabla_datos,NOMBRE_ESTADO.x==Entidad,select=c("Ausentismo2",vector_variables)))
     indicador_nacional<-0
     Concurrente<-unique(tabla_datos$Concurrente1[which(tabla_datos$NOMBRE_ESTADO.x==Entidad)])
-    tabla_resultados1<-subset(subset(tabla_datos,NOMBRE_ESTADO.x==Entidad,select=c(vector_variables,"Ausentismo2",
-                                                                                   "Llave.Casilla","NOMBRE_ESTADO.x","iD_ESTADO.x","ID_DISTRITO.x","SECCION","ID_CASILLA","TIPO_CASILLA","EXT_CONTIGUA")))
+    tabla_resultados1<-subset(subset(tabla_datos,NOMBRE_ESTADO.x==Entidad),select=c(vector_variables,"Ausentismo2",
+                                                                                   "Llave.Casilla","NOMBRE_ESTADO.x","iD_ESTADO.x","ID_DISTRITO.x","SECCION","ID_CASILLA","TIPO_CASILLA","EXT_CONTIGUA"))
   }
   
   
