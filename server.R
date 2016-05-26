@@ -645,7 +645,7 @@ shinyServer(function(input, output,session) {
     vector_est_probs[i]<-exp(vector_eta_entrenamiento[i])/(1+exp(vector_eta_entrenamiento[i]))
   }
   
-  data_comparacion_entrena<-data.frame(Y_reales=datos_entrenamiento$Ausentismo2,Probabilidad_Ausentismo_Estimada=vector_est_probs)
+  
   
   
 
@@ -664,4 +664,5 @@ shinyServer(function(input, output,session) {
 # medias_sim<-simulacionesY$Medias_Simulaciones
 # 
 # plot(Y,medias_sim,xlim=c(4,8),ylim=c(3,11))
-# abline(a=0,b=1)
+# abline(a=0,b=1)ç
+  

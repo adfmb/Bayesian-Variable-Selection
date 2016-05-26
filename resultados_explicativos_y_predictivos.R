@@ -3,32 +3,38 @@ resultados_entidad<-read.csv(paste(Entidad,"_60%_entrena_p05.csv",sep=""),header
 resultados_entidad$Mult_extremos_intervalos<-1-as.numeric((resultados_entidad$X2.50.*resultados_entidad$X97.50.)<0)
 datos_entrenamiento<-read.csv(paste(Entidad,"_Datos_entrenamiento_60%_entrena.csv",sep=""),header=TRUE)
 datos_prueba<-read.csv(paste(Entidad,"_Datos_prueba_40%_prueba.csv",sep=""),header=TRUE)
-
-##############################################################################
-#Generación de código para elegir el modelo de mayor frecuencia
 betas_simuladas<-read.csv("betas.csv",header=TRUE)
 indicadoras_simuladas<-read.csv("indicadoras.csv",header=TRUE)
 var_expl<-ncol(betas_simuladas)-1
 probs_individuales_Indicadoras<-as.numeric(as.character(resultados_entidad[1:var_expl,2]))
 valores_individuales_Betas<-as.numeric(as.character(resultados_entidad[(var_expl+4):(2*var_expl+4-1),2]))
 
+##############################################################################
+#Generación de código para generar las configuraciones del vector final theta dependiendo de
+#del método para la generación del modelo
+
+#Tabla para generar frecuencias y probabilidades de cada una de las configuraciones gamma generadas
 frecuencias_configuraciones<-ddply(indicadoras_simuladas,~V1+V2+V3+V4+V5+V6+V7+V8+V9+V10+V11+
                                      V12+V13+V14+V15+V16+V17+V18+V19+V20+V21+V22+V23+
                                      V24+V25+V26,summarise,
                                    Frecuencia=length(V1),
                                    Probabilidad=length(V1)/nrow(indicadoras_simuladas)) #
-
+#Ponemos la configuración de mayor frecuencia (probabilidad) hasta arriba de la tabla y la dejamos en orden decreciente
 orden_freq<-frecuencias_configuraciones[order(frecuencias_configuraciones$Frecuencia,decreasing = T) , ]
+
+#Tomamos las medias de las betas y alpha generadas or Gibbs
 alpha<-as.numeric(as.character(resultados_entidad[var_expl+3,2]))
 betas_promedio<-as.numeric(as.character(resultados_entidad[(var_expl+4):(2*var_expl+4-1),2]))
 
 
+#1.- Configuración para argmax (para casos explicativos)
 conf_theta_final_maximo<-numeric(var_expl)
 for(j in 1:var_expl){
   # j<-1  
   conf_theta_final_maximo[j]=orden_freq[1,j]*betas_promedio[j]
 }
 
+#2.- Configuración para promedio bayesiano (para casos predictivos)
 conf_theta_final_promedio<-numeric(var_expl)
 for(i in 1:nrow(orden_freq)){
   # i<-1
@@ -40,6 +46,7 @@ for(i in 1:nrow(orden_freq)){
   
 }
 
+#3.- Configuración para utilizar las probabilidades individuales de cada variable (método propio)
 conf_theta_probas_individuales<-numeric(var_expl)
   for(j in 1:var_expl){
     # j<-1  
@@ -50,7 +57,7 @@ conf_theta_probas_individuales<-numeric(var_expl)
 
 ##############################################################################
 #####Para explicar datos de entrenamiento
-#Se toman los coeficientes de la configuración más visitada/frecuentada/con-probabilidad-mayor
+#Se toman los coeficientes de la configuración más visitada/frecuentada/con-probabilidad-mayor (1)
 
 vector_eta_entrenamiento<-rep(alpha,nrow(datos_entrenamiento))
 for(i in 1:nrow(datos_entrenamiento)){
@@ -82,7 +89,7 @@ points(data_comparacion_entrena$Y_reales[or2],cex=.5,col=2,type="p")
 
 ##############################################################################
 #####Para predecir con datos de prueba
-#Se toman los coeficientes de cada covariable por su indicadora por su respectiva probabilidad de aparición (promedios)
+#Se toman los coeficientes de cada covariable por su indicadora por su respectiva probabilidad de aparición (promedios) (2)
 
 
 vector_eta_prueba<-rep(alpha,nrow(datos_prueba))
@@ -115,7 +122,7 @@ points(data_comparacion_prueba$Y_reales[or3],cex=.5,col=2,type="p")
 
 
 ##############################################################################
-#####Usando las probabilidades individuales
+#####Usando las probabilidades individuales (3)
 
 #Datos de entrenamiento
 
@@ -208,7 +215,7 @@ p2 <- ggplot(df, aes(x=coefs, y=probs)) +
 
 ###################################################################
 #####Matriz de confusión
-#Hay que recordar que siempre la usaremos para predicción.
+#se pueden cambiar el umbral (threshold) a partir del cuál se consideran casos de Ausentismo
 matriz_confusion<-function(tabla_comparativa,umbral=0.5){
   
   data_real_ausentismo<-subset(tabla_comparativa,Y_reales==1)
