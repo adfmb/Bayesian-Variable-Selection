@@ -87,14 +87,53 @@ jags_out_60porc_PInd_05_nsim<-jags(data2,inits,
                               parameters,
                               model.file="ssvs_03.txt",
                               n.iter=iteraciones_jags,
-                              n.chains=3,n.burnin=calentamiento_jags,n.sims=10000)
+                              n.chains=3,n.burnin=calentamiento_jags,n.thin=2)
 
+#Datos para generar la gráfica de betas vs probabilidades de aparición en el modelo
+probs<-jags_out_60porc_PInd_05$BUGSoutput$summary[1:var_expl,1]
+coef_betas<-jags_out_60porc_PInd_05$BUGSoutput$summary[(var_expl+4):(2*var_expl+4-1),1]
+
+cfs<-numeric(length(coef_betas))
+abs_cfs<-numeric(length(coef_betas))
+for(i in 1:length(coef_betas)){
+    
+    cfs[i]<-coef_betas[i]
+    abs_cfs[i]<-abs(coef_betas[i])
+}
+or1<-order(abs_cfs)
+ordenados_cfs<-abs_cfs[or1]
+or_coef<-order(abs(coef_betas))
+ordenados_proba<-probs[or_coef]
+
+df <- data.frame(probs=probs[or_coef], coefs = abs(coef_betas)[or_coef])
+p2 <- ggplot(df, aes(x=coefs, y=probs)) +
+geom_point(size=5, alpha=.7) +
+theme_classic() +
+xlab("Absolute value of estimate coefficient") +
+ylab("Posterior probability of non-zeroness")
+# Aquí termina la gráfica de betas vs probabilidades de aparición en el modelo
+
+##############################################################################
+#Generación de código para elegir el modelo de mayor frecuencia
 betas<-as.data.frame(jags_out_60porc_PInd_05$BUGSoutput$sims.list$beta)
 indicadoras<-as.data.frame(jags_out_60porc_PInd_05$BUGSoutput$sims.list$Ind)
-g0_1<-ddply(indicadoras,~V1+V2+V3+V4+V5+V6+V7+V8+V9+V10+V11+
-              V12+V13+V14+V15+V16+V17+V18+V19+V20+V21+V22+V23+
-              V24+V25+V26,summarise,
-            Numero_operaciones=length(V1)) #
+write.csv(betas,file=paste("betas.csv",sep=""),row.names = TRUE)
+write.csv(indicadoras,file=paste("indicadoras.csv",sep=""),row.names = TRUE)
+
+
+frecuencias_configuraciones<-ddply(indicadoras,~V1+V2+V3+V4+V5+V6+V7+V8+V9+V10+V11+
+V12+V13+V14+V15+V16+V17+V18+V19+V20+V21+V22+V23+
+V24+V25+V26,summarise,
+Frecuencia=length(V1)) #
+
+
+
+
+
+
+##############################################################################
+#Generación de código para correr modelo elegido
+
 
 
 
