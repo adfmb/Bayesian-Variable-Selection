@@ -181,6 +181,31 @@ vs Casos Realesen los datos de prueba
 (usando las probabilidades individuales de cada Indicadora)"))
 points(data_comparacion_prueba2$Y_reales[or4],cex=.5,col=2,type="p")
 
+##################################################################
+#Datos para generar la gráfica de betas vs probabilidades de aparición en el modelo
+probs<-probs_individuales_Indicadoras
+coef_betas<-betas_promedio
+
+cfs<-numeric(length(coef_betas))
+abs_cfs<-numeric(length(coef_betas))
+for(i in 1:length(coef_betas)){
+  
+  cfs[i]<-coef_betas[i]
+  abs_cfs[i]<-abs(coef_betas[i])
+}
+or1<-order(abs_cfs)
+ordenados_cfs<-abs_cfs[or1]
+or_coef<-order(abs(coef_betas))
+ordenados_proba<-probs[or_coef]
+
+df <- data.frame(probs=probs[or_coef], coefs = abs(coef_betas)[or_coef])
+p2 <- ggplot(df, aes(x=coefs, y=probs)) +
+  geom_point(size=5, alpha=.7) +
+  theme_classic() +
+  xlab("Absolute value of estimate coefficient") +
+  ylab("Posterior probability of non-zeroness")
+# Aquí termina la gráfica de betas vs probabilidades de aparición en el modelo
+
 ###################################################################
 #####Matriz de confusión
 #Hay que recordar que siempre la usaremos para predicción.
